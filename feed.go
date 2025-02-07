@@ -41,7 +41,8 @@ type Item struct {
 
 type Feed struct {
 	Title       string
-	Link        *Link
+	Link        *Link     // Keep for backwards compatibility
+	Links       []*Link   // Add this new field
 	Description string
 	Author      *Author
 	Updated     time.Time
@@ -54,8 +55,24 @@ type Feed struct {
 }
 
 // add a new Item to a Feed
-func (f *Feed) Add(item *Item) {
-	f.Items = append(f.Items, item)
+// SetSelfLink sets the "self" link for the feed
+func (f *Feed) SetSelfLink(href string) {
+    selfLink := &Link{
+        Href: href,
+        Rel:  "self",
+        Type: "application/atom+xml",
+    }
+    
+    // Look for existing self link to update
+    for i, link := range f.Links {
+        if link.Rel == "self" {
+            f.Links[i] = selfLink
+            return
+        }
+    }
+    
+    // Add new self link if none exists
+    f.Links = append(f.Links, selfLink)
 }
 
 // returns the first non-zero time formatted as a string or ""

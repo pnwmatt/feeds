@@ -67,17 +67,17 @@ type AtomLink struct {
 }
 
 type AtomFeed struct {
-	XMLName     xml.Name `xml:"feed"`
-	Xmlns       string   `xml:"xmlns,attr"`
-	Title       string   `xml:"title"`   // required
-	Id          string   `xml:"id"`      // required
-	Updated     string   `xml:"updated"` // required
-	Category    string   `xml:"category,omitempty"`
-	Icon        string   `xml:"icon,omitempty"`
-	Logo        string   `xml:"logo,omitempty"`
-	Rights      string   `xml:"rights,omitempty"` // copyright used
-	Subtitle    string   `xml:"subtitle,omitempty"`
-	Link        *AtomLink
+	XMLName     xml.Name    `xml:"feed"`
+	Xmlns       string      `xml:"xmlns,attr"`
+	Title       string      `xml:"title"`   // required
+	Id          string      `xml:"id"`      // required
+	Updated     string      `xml:"updated"` // required
+	Category    string      `xml:"category,omitempty"`
+	Icon        string      `xml:"icon,omitempty"`
+	Logo        string      `xml:"logo,omitempty"`
+	Rights      string      `xml:"rights,omitempty"` // copyright used
+	Subtitle    string      `xml:"subtitle,omitempty"`
+	Links       []AtomLink  `xml:"link"`           // Change from single Link to Links slice
 	Author      *AtomAuthor `xml:"author,omitempty"`
 	Contributor *AtomContributor
 	Entries     []*AtomEntry `xml:"entry"`
@@ -145,22 +145,40 @@ func newAtomEntry(i *Item) *AtomEntry {
 // create a new AtomFeed with a generic Feed struct's data
 func (a *Atom) AtomFeed() *AtomFeed {
 	updated := anyTimeFormat(time.RFC3339, a.Updated, a.Created)
-	link := a.Link
-	if link == nil {
-		link = &Link{}
-	}
 	feed := &AtomFeed{
 		Xmlns:    ns,
 		Title:    a.Title,
-		Link:     &AtomLink{Href: link.Href, Rel: link.Rel},
 		Subtitle: a.Description,
-		Id:       link.Href,
+		Id:       a.Id,
 		Updated:  updated,
 		Rights:   a.Copyright,
 	}
+
+	// Handle links
+	if a.Link != nil {
+		feed.Links = append(feed.Links, AtomLink{
+			Href: a.Link.Href,
+			Rel:  a.Link.Rel,
+			Type: a.Link.Type,
+		})
+	}
+
+	// Add all additional links
+	if a.Links != nil {
+		for _, link := range a.Links {
+			feed.Links = append(feed.Links, AtomLink{
+				Href:   link.Href,
+				Rel:    link.Rel,
+				Type:   link.Type,
+				Length: link.Length,
+			})
+		}
+	}
+
 	if a.Author != nil {
 		feed.Author = &AtomAuthor{AtomPerson: AtomPerson{Name: a.Author.Name, Email: a.Author.Email}}
 	}
+	
 	for _, e := range a.Items {
 		feed.Entries = append(feed.Entries, newAtomEntry(e))
 	}
