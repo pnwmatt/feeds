@@ -191,13 +191,14 @@ var testAtomFeedXML = AtomFeed{
 	Logo:     "",
 	Rights:   "",
 	Subtitle: "",
-	Link: &AtomLink{
+	Links: []*AtomLink{{
 		XMLName: xml.Name{Space: "", Local: "link"},
 		Href:    "",
 		Rel:     "",
 		Type:    "",
 		Length:  "",
-	},
+	
+	}},
 	Author: &AtomAuthor{
 		XMLName:    xml.Name{Space: "", Local: "author"},
 		AtomPerson: AtomPerson{},

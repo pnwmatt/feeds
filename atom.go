@@ -77,7 +77,7 @@ type AtomFeed struct {
 	Logo        string      `xml:"logo,omitempty"`
 	Rights      string      `xml:"rights,omitempty"` // copyright used
 	Subtitle    string      `xml:"subtitle,omitempty"`
-	Links       []AtomLink  `xml:"link"`           // Change from single Link to Links slice
+	Links       []*AtomLink `xml:"link"` // Change from single Link to Links slice
 	Author      *AtomAuthor `xml:"author,omitempty"`
 	Contributor *AtomContributor
 	Entries     []*AtomEntry `xml:"entry"`
@@ -156,7 +156,7 @@ func (a *Atom) AtomFeed() *AtomFeed {
 
 	// Handle links
 	if a.Link != nil {
-		feed.Links = append(feed.Links, AtomLink{
+		feed.Links = append(feed.Links, &AtomLink{
 			Href: a.Link.Href,
 			Rel:  a.Link.Rel,
 			Type: a.Link.Type,
@@ -166,7 +166,7 @@ func (a *Atom) AtomFeed() *AtomFeed {
 	// Add all additional links
 	if a.Links != nil {
 		for _, link := range a.Links {
-			feed.Links = append(feed.Links, AtomLink{
+			feed.Links = append(feed.Links, &AtomLink{
 				Href:   link.Href,
 				Rel:    link.Rel,
 				Type:   link.Type,
@@ -178,7 +178,7 @@ func (a *Atom) AtomFeed() *AtomFeed {
 	if a.Author != nil {
 		feed.Author = &AtomAuthor{AtomPerson: AtomPerson{Name: a.Author.Name, Email: a.Author.Email}}
 	}
-	
+
 	for _, e := range a.Items {
 		feed.Entries = append(feed.Entries, newAtomEntry(e))
 	}

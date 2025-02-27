@@ -54,7 +54,6 @@ type Feed struct {
 	Image       *Image
 }
 
-// add a new Item to a Feed
 // SetSelfLink sets the "self" link for the feed
 func (f *Feed) SetSelfLink(href string) {
     selfLink := &Link{
